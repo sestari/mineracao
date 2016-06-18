@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/../n4/CG_N4.iml" filepath="$PROJECT_DIR$/../n4/CG_N4.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../n4/CG_N4-CORE/CG_N4-CORE.iml" filepath="$PROJECT_DIR$/../n4/CG_N4-CORE/CG_N4-CORE.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../n4/CG_N4-LAUNCHER/CG_N4-LAUNCHER.iml" filepath="$PROJECT_DIR$/../n4/CG_N4-LAUNCHER/CG_N4-LAUNCHER.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../n4/CG_N4-SCENE-EDITOR/CG_N4-SCENE-EDITOR.iml" filepath="$PROJECT_DIR$/../n4/CG_N4-SCENE-EDITOR/CG_N4-SCENE-EDITOR.iml" />
+      <module fileurl="file://$PROJECT_DIR$/furb.iml" filepath="$PROJECT_DIR$/furb.iml" />
+    </modules>
+  </component>
+</project>
