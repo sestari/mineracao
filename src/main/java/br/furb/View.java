@@ -177,21 +177,32 @@ public class View extends JPanel implements ActionListener {
 			g.start();
 			org.bytedeco.javacv.Frame frame = g.grabImage();
 
+			Integer qtFrames = 101;
+
 			while (frame != null) {
-				BufferedImage image = paintConverter.getBufferedImage(frame,
-						2.2 / g.getGamma());
-				// ImageIO.write(image, "png", new
-				// File("/Users/andresestari/Desktop/teste/video-frame-" +
-				// System.currentTimeMillis() + ".png"));
+				qtFrames++;
+				if(qtFrames > 100) {
+					frame = g.grabImage();
+					qtFrames = 0;
 
-				// pega 4 cores do frame
-				colors.add(getRGBImage(40, 40, image));
-				colors.add(getRGBImage(image.getHeight() - 40,
-						image.getHeight() - 40, image));
-				colors.add(getRGBImage(40, image.getHeight() - 40, image));
-				colors.add(getRGBImage(image.getHeight() - 40, 40, image));
+					BufferedImage image = paintConverter.getBufferedImage(frame, 2.2 / g.getGamma());
 
-				frame = g.grabImage();
+					if(image != null) {
+						// ImageIO.write(image, "png", new
+						// File("/Users/andresestari/Desktop/teste/video-frame-" +
+						// System.currentTimeMillis() + ".png"));
+
+						// pega 4 cores do frame
+						colors.add(getRGBImage(40, 40, image));
+						colors.add(getRGBImage(image.getHeight() - 40,
+								image.getHeight() - 40, image));
+						colors.add(getRGBImage(40, image.getHeight() - 40, image));
+						colors.add(getRGBImage(image.getHeight() - 40, 40, image));
+
+					}
+				}else{
+					g.grabFrame(false);
+				}
 			}
 			g.stop();
 			VideoRGBV videoInfo = new VideoRGBV(colors);
