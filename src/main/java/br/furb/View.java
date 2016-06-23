@@ -1,12 +1,30 @@
 package br.furb;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
 
-import javax.swing.*;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 
@@ -24,6 +42,7 @@ public class View extends JPanel implements ActionListener {
 	private static final long serialVersionUID = 1L;
 	static private final String newline = "\n";
 	private JButton openButton, exportButton, resetButton;
+	private JTextField qtFramesTF, corteTF;
 	private JTextArea log;
 	private JFileChooser fc;
 	private JFileChooser fcExport;
@@ -44,8 +63,7 @@ public class View extends JPanel implements ActionListener {
 
 		table = new JTable();
 		dtm = new DefaultTableModel(0, 0);
-		String header[] = new String[] { "Nome", "R", "G", "B", "Variação",
-				"Gênero" };
+		String header[] = new String[] { "Nome", "R", "G", "B", "Variação", "Gênero" };
 		dtm.setColumnIdentifiers(header);
 		table.setModel(dtm);
 		JScrollPane tableScrollPane = new JScrollPane(table);
@@ -63,6 +81,10 @@ public class View extends JPanel implements ActionListener {
 
 		exportButton = new JButton("Exportar");
 		exportButton.addActionListener(this);
+		
+		qtFramesTF = new JTextField("1000");
+		
+		corteTF = new JTextField("1000");
 
 		resetButton = new JButton("Apagar Tabela");
 		resetButton.addActionListener(this);
@@ -70,6 +92,11 @@ public class View extends JPanel implements ActionListener {
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.add(openButton);
 		buttonPanel.add(exportButton);
+		buttonPanel.add(new JLabel("Índice frames"));
+		buttonPanel.add(qtFramesTF);
+		buttonPanel.add(new JLabel("Cortes finais"));
+		buttonPanel.add(corteTF);
+		
 
 		add(buttonPanel, BorderLayout.PAGE_START);
 		add(logScrollPane, BorderLayout.CENTER);
@@ -97,8 +124,7 @@ public class View extends JPanel implements ActionListener {
 			// Handle save button action.
 		} else if (e.getSource().equals(exportButton)) {
 			if (dtm.getRowCount() == 0) {
-				JOptionPane.showMessageDialog(null,
-						"Nenhum arquivo foi selecionado!");
+				JOptionPane.showMessageDialog(null, "Nenhum arquivo foi selecionado!");
 			}
 			int returnVal = fcExport.showSaveDialog(View.this);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -147,9 +173,9 @@ public class View extends JPanel implements ActionListener {
 			row.createCell(3).setCellValue("B");
 			row.createCell(4).setCellValue("Variação");
 			row.createCell(5).setCellValue("Gênero");
-			for(int x = 0; x<dtm.getRowCount();x++){
+			for (int x = 0; x < dtm.getRowCount(); x++) {
 				row = firstSheet.createRow(x);
-				for(int y = 0; y<6;y++)
+				for (int y = 0; y < 6; y++)
 					row.createCell(y).setCellValue(dtm.getValueAt(x, y).toString());
 			}
 			workbook.write(fos);
@@ -171,52 +197,77 @@ public class View extends JPanel implements ActionListener {
 	}
 
 	private void tratarVideo(File file) {
-
+		colors.clear();
+		
+		int indice = Integer.valueOf(qtFramesTF.getText());
+		
+		log.setText("");
+		
 		FFmpegFrameGrabber g = new FFmpegFrameGrabber(file);
+		
 		try {
 			g.start();
+
 			org.bytedeco.javacv.Frame frame = g.grabImage();
 
-			Integer qtFrames = 101;
+			Integer qtFrames = 0;
+
+			
+							
+			Long inicioF = new Date().getTime();
+			
+			
 
 			while (frame != null) {
-				qtFrames++;
-				if(qtFrames > 100) {
-					frame = g.grabImage();
+				
+				Long a = new Date().getTime();
+				
+				if(qtFrames >= indice){
 					qtFrames = 0;
+					frame = g.grabImage();
+				
 
 					BufferedImage image = paintConverter.getBufferedImage(frame, 2.2 / g.getGamma());
-
-					if(image != null) {
-						// ImageIO.write(image, "png", new
-						// File("/Users/andresestari/Desktop/teste/video-frame-" +
-						// System.currentTimeMillis() + ".png"));
-
+	
+					if (image != null) {
+	
 						// pega 4 cores do frame
-						colors.add(getRGBImage(40, 40, image));
-						colors.add(getRGBImage(image.getHeight() - 40,
-								image.getHeight() - 40, image));
-						colors.add(getRGBImage(40, image.getHeight() - 40, image));
-						colors.add(getRGBImage(image.getHeight() - 40, 40, image));
-
+						int[] rgb1 = getRGBImage(40, 40, image);
+						int[] rgb2 = getRGBImage(image.getHeight() - 40, image.getHeight() - 40, image);
+						int[] rgb3 = getRGBImage(40, image.getHeight() - 40, image);
+						int[] rgb4 = getRGBImage(image.getHeight() - 40, 40, image);
+						
+						colors.add(rgb1);
+						colors.add(rgb2);
+						colors.add(rgb3);
+						colors.add(rgb4);
+						
 					}
-				}else{
-					g.grabFrame(false);
+					
+				} else {
+					Long b = new Date().getTime();
+					frame = g.grabFrame(false);
 				}
+			
+				qtFrames++;
 			}
+			
+			
+			System.out.println((new Date().getTime() - inicioF) / 1000d + "s");
+			
 			g.stop();
-			VideoRGBV videoInfo = new VideoRGBV(colors);
+			VideoRGBV videoInfo = new VideoRGBV(colors, Integer.valueOf(corteTF.getText()));
 			// coloca o nome, o genero, r, g, b e a variação de frame
 
-			dtm.addRow(new Object[] { file.getName(), videoInfo.red, videoInfo.green,
-					videoInfo.blue, videoInfo.variacao, "" });
+			dtm.addRow(new Object[] { file.getName(), videoInfo.red, videoInfo.green, videoInfo.blue,
+					videoInfo.variacao, "" });
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} /*
-		 * catch (IOException e) { // TODO Auto-generated catch block
-		 * e.printStackTrace(); }
-		 */
+			 * catch (IOException e) { // TODO Auto-generated catch block
+			 * e.printStackTrace(); }
+			 */
 	}
 
 	protected static ImageIcon createImageIcon(String path) {
